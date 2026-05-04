@@ -16,7 +16,7 @@
 
 - Предложение дополнительных метрик, инструментов для масштабирования, логирования;
 
-- План A/B-тестирования тестирование
+- План A/B-тестирования
 
 ---
 
@@ -47,6 +47,11 @@ credit-card-default-ab-testing/
 ├── src/
 │   └── models/
 │       └── train_model.py
+│
+├── screenshots/
+│   ├── DockerDesktop.JPG
+│   ├── health.JPG
+│   └── predict.JPG
 │
 ├── ab_test_plan.md
 ├── docker-compose.yml
@@ -79,16 +84,68 @@ python src/models/train_model.py
 
 ```
 
-### **Запуск API**
+## API
 
+### GET /health
+
+Проверка работоспособности сервиса
+
+Пример запроса:
 ```bash
-python -m app.api
+curl.exe http://127.0.0.1:5000/health
 ```
 
-Сервис будет доступен по адресу:
-```text
-http://localhost:5000
+Пример ответа:
+```json
+{
+  "model_version": "v1",
+  "service": "credit-card-default-prediction",
+  "status": "ok"
+}
 ```
+
+### POST /predict
+
+Пример запроса:
+```bash
+curl.exe -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d "@request.json"
+```
+
+Пример запроса:
+```JSON
+{
+  "LIMIT_BAL": 20000,
+  "SEX": 2,
+  "EDUCATION": 2,
+  "MARRIAGE": 1,
+  "AGE": 24,
+  "PAY_0": 2,
+  "PAY_2": 2,
+  "PAY_3": 0,
+  "PAY_4": 0,
+  "PAY_5": 0,
+  "PAY_6": 0,
+  "BILL_AMT1": 3913,
+  "BILL_AMT2": 3102,
+  "BILL_AMT3": 689,
+  "BILL_AMT4": 0,
+  "BILL_AMT5": 0,
+  "BILL_AMT6": 0,
+  "PAY_AMT1": 0,
+  "PAY_AMT2": 689,
+  "PAY_AMT3": 0,
+  "PAY_AMT4": 0,
+  "PAY_AMT5": 0,
+  "PAY_AMT6": 0
+}
+```
+
+Пример ответа:
+```json
+{"prediction":1,"probability":0.7898}
+```
+
+
 ---
 
 ## **Docker**
@@ -103,7 +160,7 @@ docker build -f docker/Dockerfile -t credit-card-default-service .
 
 ```bash
 docker pull vpetrov23ml/credit-card-default-service:v1
-docker run -p 5000:5000 credit-card-default-service
+docker run -p 5000:5000 vpetrov23ml/credit-card-default-service:v1
 ```
 
 ---
@@ -137,7 +194,7 @@ https://hub.docker.com/r/vpetrov23ml/credit-card-default-service
 
 - асинхронной обработки запросов;
 
-- необходимости внеднения инфраструктуры с участием очереди;
+- необходимости внедрения инфраструктуры с участием очереди;
 
 - логирования
 ---
@@ -183,7 +240,7 @@ docker compose up --build
 
 
 
-**## Бизнес-метрики**
+## **Бизнес-метрики**
 
 - Ожидаемые финансовые потери (рассчитываются на основе вероятности дефолта и суммы кредита);
 
@@ -199,14 +256,5 @@ docker compose up --build
 
 ## Демонстрация работы
 
-### Health endpoint
-
-![alt text](image.png)
-
-### Prediction endpoint
-
-![alt text](image-1.png)
-
-### Docker container
-![alt text](image-2.png)
+Скриншоты работы сервиса находятся в папке `screenshots/`
 
