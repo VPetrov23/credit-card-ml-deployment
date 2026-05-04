@@ -1,7 +1,7 @@
-# Разработка и внедрение сервиса прогнозирования дефолта \nпо кредитным картам с контейнеризацией и A/B-тестированием
+# **Разработка и внедрение сервиса прогнозирования дефолта по кредитным картам с контейнеризацией и A/B-тестированием**
 
 
-## Описание проекта
+## **Описание проекта**
 
 В рамках проекта разработан сервис машинного обучения для прогнозирования дефолта по кредитным картам.
 
@@ -20,7 +20,7 @@
 
 ---
 
-## Структура проекта
+## **Структура проекта**
 
 ```
 credit-card-default-ab-testing/
@@ -58,7 +58,7 @@ credit-card-default-ab-testing/
 ---
 
 
-## Запуск локально
+## **Запуск локально**
 
 ```bash
 python -m venv .venv
@@ -71,13 +71,15 @@ pip install -r requirements.txt
 python app/api.py
 ```
 
-### Обучение модели
+
+### **Обучение модели**
 
 ```bash
 python src/models/train_model.py
+
 ```
 
-### Запуск API
+### **Запуск API**
 
 ```bash
 python -m app.api
@@ -89,7 +91,7 @@ http://localhost:5000
 ```
 ---
 
-## Docker
+## **Docker**
 
 Сборка:
 
@@ -106,38 +108,17 @@ docker run -p 5000:5000 credit-card-default-service
 
 ---
 
-## Docker Hub
+## **Docker Hub**
 
 https://hub.docker.com/r/vpetrov23ml/credit-card-default-service
 
 ---
 
-## API
 
-GET /health
-
-curl http://127.0.0.1:5000/health
-
-Ответ:
-
-{"status":"ok","model_version":"v1"}
-
----
-
-POST /predict
-
-curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d @request.json
-
-Ответ:
-
-{"prediction":1,"probability":0.7898}
-
----
+## **Архитектура сервиса (концепт):**
 
 
-## Архитектура сервиса (концепт):
-
-### Монолит vs микросервисы
+### **Монолит vs микросервисы**
 
 В рамках данного учебного проекта выбран **монолитный подход**.
 
@@ -150,7 +131,7 @@ curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -
 - нет необходимости масштабирования;
 
 
-### Концепт брокеров сообщений
+### **Концепт брокеров сообщений**
 
 В будущем можно использовать **RabbitMQ** для:
 
@@ -161,7 +142,7 @@ curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -
 - логирования
 ---
 
-### Логирование
+### **Логирование**
 
 Для сбора и анализа логов может использоваться ELK-стек (Elasticsearch, Logstash, Kibana), который позволяет:
 
@@ -176,7 +157,7 @@ curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -
 
 Также можно использовать связку Prometheus (для сбора и хранения метрик, а также для настройки системы мониторинга и оповещений ) и Grafana (для визуализации данных).
 
-## Оркестрация
+## **Оркестрация**
 
 В рамках проекта создан файл docker-compose.yml
 
@@ -187,18 +168,22 @@ docker compose up --build
 ```
 
 
-### Обзор инструментов MLops (концепт)
+## **Обзор инструментов MLops (концепт)**
 
-#### DVC
+
+### **DVC**
+
 
 **DVC** позволяет управлять версиями файлов и каталогов данных, промежуточными результатами и моделями ML с использованием системы Git.
 
-#### MLflow
+
+### **MLflow**
 
 **MLflow** используется для логирования экспериментов, хранения кода, данных, результатов обучения.
 
 
-## Бизнес-метрики
+
+**## Бизнес-метрики**
 
 - Ожидаемые финансовые потери (рассчитываются на основе вероятности дефолта и суммы кредита);
 
@@ -206,7 +191,7 @@ docker compose up --build
 
 ---
 
-## Организация A/B-тестирования
+## **Организация A/B-тестирования**
 
 См. ab_test_plan.md
 
@@ -215,11 +200,13 @@ docker compose up --build
 ## Демонстрация работы
 
 ### Health endpoint
-![health](screenshots/health.png)
+
+![alt text](image.png)
 
 ### Prediction endpoint
-![predict](screenshots/predict.png)
+
+![alt text](image-1.png)
 
 ### Docker container
-![docker](screenshots/docker.png)
+![alt text](image-2.png)
 
