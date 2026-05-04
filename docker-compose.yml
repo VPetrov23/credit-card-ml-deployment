@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  credit-card-default-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: credit-card-default-service
+    ports:
+      - "5000:5000"
+    restart: always
