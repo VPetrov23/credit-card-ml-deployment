@@ -1,57 +1,225 @@
-credit-card-ml-deployment
-==============================
-
-A short description of the project.
-
-Project Organization
-------------
-
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+# Разработка и внедрение сервиса прогнозирования дефолта \nпо кредитным картам с контейнеризацией и A/B-тестированием
 
 
---------
+## Описание проекта
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+В рамках проекта разработан сервис машинного обучения для прогнозирования дефолта по кредитным картам.
+
+
+Сервис включает:
+
+- обучение модели RandomForestClassifier;
+
+- Flask API с эндпоинтами `/health` и `/predict`;
+
+- Docker-контейнеризацию;
+
+- Предложение дополнительных метрик, инструментов для масштабирования, логирования;
+
+- План A/B-тестирования тестирование
+
+---
+
+## Структура проекта
+
+```
+credit-card-default-ab-testing/
+│
+├── app/
+│   ├── api.py
+│   ├── model_handler.py
+│   └── __init__.py
+│
+├── data/
+│   └── raw/
+│       └── UCI_Credit_Card.csv
+│
+├── docker/
+│   └── Dockerfile
+│
+├── models/
+│   ├── model_v1.joblib
+│   └── features.json
+│
+├── reports/
+│   └── metrics_v1.json
+│
+├── src/
+│   └── models/
+│       └── train_model.py
+│
+├── ab_test_plan.md
+├── docker-compose.yml
+├── request.json
+├── requirements.txt
+└── README.md
+```
+
+---
+
+
+## Запуск локально
+
+```bash
+python -m venv .venv
+```
+
+Windows PowerShell:
+```powershell
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+python app/api.py
+```
+
+### Обучение модели
+
+```bash
+python src/models/train_model.py
+```
+
+### Запуск API
+
+```bash
+python -m app.api
+```
+
+Сервис будет доступен по адресу:
+```text
+http://localhost:5000
+```
+---
+
+## Docker
+
+Сборка:
+
+```bash
+docker build -f docker/Dockerfile -t credit-card-default-service .
+```
+
+Запуск:
+
+```bash
+docker pull vpetrov23ml/credit-card-default-service:v1
+docker run -p 5000:5000 credit-card-default-service
+```
+
+---
+
+## Docker Hub
+
+https://hub.docker.com/r/vpetrov23ml/credit-card-default-service
+
+---
+
+## API
+
+GET /health
+
+curl http://127.0.0.1:5000/health
+
+Ответ:
+
+{"status":"ok","model_version":"v1"}
+
+---
+
+POST /predict
+
+curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d @request.json
+
+Ответ:
+
+{"prediction":1,"probability":0.7898}
+
+---
+
+
+## Архитектура сервиса (концепт):
+
+### Монолит vs микросервисы
+
+В рамках данного учебного проекта выбран **монолитный подход**.
+
+Причины:
+
+- простота реализации;
+
+- быстрее разработка и деплой;
+
+- нет необходимости масштабирования;
+
+
+### Концепт брокеров сообщений
+
+В будущем можно использовать **RabbitMQ** для:
+
+- асинхронной обработки запросов;
+
+- необходимости внеднения инфраструктуры с участием очереди;
+
+- логирования
+---
+
+### Логирование
+
+Для сбора и анализа логов может использоваться ELK-стек (Elasticsearch, Logstash, Kibana), который позволяет:
+
+- мониторить работу сервиса
+
+- анализировать поведение модели
+
+- отслеживать ошибки
+
+- визуализировать метрики
+
+
+Также можно использовать связку Prometheus (для сбора и хранения метрик, а также для настройки системы мониторинга и оповещений ) и Grafana (для визуализации данных).
+
+## Оркестрация
+
+В рамках проекта создан файл docker-compose.yml
+
+Запуск:
+
+```bash
+docker compose up --build
+```
+
+
+### Обзор инструментов MLops (концепт)
+
+#### DVC
+
+**DVC** позволяет управлять версиями файлов и каталогов данных, промежуточными результатами и моделями ML с использованием системы Git.
+
+#### MLflow
+
+**MLflow** используется для логирования экспериментов, хранения кода, данных, результатов обучения.
+
+
+## Бизнес-метрики
+
+- Ожидаемые финансовые потери (рассчитываются на основе вероятности дефолта и суммы кредита);
+
+- Default Rate - отношение дефолтов к количеству одобренных кредитов.
+
+---
+
+## Организация A/B-тестирования
+
+См. ab_test_plan.md
+
+---
+
+## Демонстрация работы
+
+### Health endpoint
+![health](screenshots/health.png)
+
+### Prediction endpoint
+![predict](screenshots/predict.png)
+
+### Docker container
+![docker](screenshots/docker.png)
+
